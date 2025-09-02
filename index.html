@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slideshow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Define a color palette using CSS variables */
+            --background-color: #0d124f; /* Light gray-blue */
+            --card-background: #ffffff; /* White */
+            --text-color: #1876d4; /* Dark gray-blue */
+            --border-color: #d1d9e6; /* Lighter gray-blue */
+            --primary-button: #3498db; /* Bright blue */
+            --primary-button-hover: #2980b9; /* Darker blue */
+            --secondary-button: #bdc3c7; /* Gray */
+            --secondary-button-hover: #95a5a6; /* Darker gray */
+            --danger-button: #e74c3c; /* Red */
+            --danger-button-hover: #c0392b; /* Darker red */
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 500px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .slideshow-container {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .slideshow-container:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .slide-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .button-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .nav-button {
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Specific button colors */
+        .prev-next-btn {
+            background-color: var(--secondary-button);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        .prev-next-btn:hover:enabled {
+            background-color: var(--secondary-button-hover);
+        }
+
+        .slideshow-btn {
+            background-color: var(--primary-button);
+            color: var(--card-background);
+        }
+        .slideshow-btn:hover:enabled {
+            background-color: var(--primary-button-hover);
+        }
+
+        .stop-btn {
+            background-color: var(--danger-button);
+            color: var(--card-background);
+        }
+        .stop-btn:hover:enabled {
+            background-color: var(--danger-button-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 24px;">Image Slideshow</h1>
+
+        <div class="slideshow-container">
+            <img id="slideImage" class="slide-image" src="https://placehold.co/600x800/e2e8f0/4a5568?text=Loading..." alt="Slideshow Image">
+        </div>
+
+        <div class="button-grid">
+            <button id="prevBtn" class="nav-button prev-next-btn">Previous</button>
+            <button id="nextBtn" class="nav-button prev-next-btn">Next</button>
+            <button id="slideshowBtn" class="nav-button slideshow-btn">Slideshow</button>
+            <button id="stopBtn" class="nav-button stop-btn" disabled>Stop</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Configuration ---
+            const images = [
+                'https://images.unsplash.com/photo-1558883493-8b86ff880fec?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2xpZGVzaG93fGVufDB8fDB8fHww',
+                'https://images.unsplash.com/photo-1622993288089-18298ec89b78?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8',
+                'https://images.unsplash.com/photo-1618310285434-1929eb5706a1?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE1fHx8ZW58MHx8fHx8',
+                'https://images.unsplash.com/photo-1593699153969-4b3a1aff4066?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwcm9maWxlLWxpa2VkfDEwfHx8ZW58MHx8fHx8',
+                'https://images.unsplash.com/photo-1660668328431-1ef1b681e642?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDI0fHx8ZW58MHx8fHx8'
+            ];
+            const slideDuration = 1200; // 1.2 seconds
+
+            // --- DOM Elements ---
+            const slideImage = document.getElementById('slideImage');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const slideshowBtn = document.getElementById('slideshowBtn');
+            const stopBtn = document.getElementById('stopBtn');
+
+            // --- State ---
+            let currentIndex = 0;
+            let slideshowInterval = null;
+
+            // --- Functions ---
+            function showImage(index) {
+                if (index >= images.length) {
+                    currentIndex = 0;
+                } else if (index < 0) {
+                    currentIndex = images.length - 1;
+                } else {
+                    currentIndex = index;
+                }
+                slideImage.style.opacity = '0';
+                setTimeout(() => {
+                    slideImage.src = images[currentIndex];
+                    slideImage.onerror = function() {
+                        this.src = `https://placehold.co/600x800/f87171/ffffff?text=Image+Error`;
+                    };
+                    slideImage.style.opacity = '1';
+                }, 200); 
+            }
+
+            function nextImage() {
+                showImage(currentIndex + 1);
+            }
+
+            function prevImage() {
+                showImage(currentIndex - 1);
+            }
+
+            function startSlideshow() {
+                if (!slideshowInterval) { 
+                    slideshowInterval = setInterval(nextImage, slideDuration);
+                    slideshowBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                }
+            }
+
+            function stopSlideshow() {
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+                slideshowBtn.disabled = false;
+                stopBtn.disabled = true;
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+            }
+
+            // --- Event Listeners ---
+            nextBtn.addEventListener('click', () => {
+                stopSlideshow();
+                nextImage();
+            });
+
+            prevBtn.addEventListener('click', () => {
+                stopSlideshow();
+                prevImage();
+            });
+
+            slideshowBtn.addEventListener('click', startSlideshow);
+            stopBtn.addEventListener('click', stopSlideshow);
+
+            // --- Initial Load ---
+            showImage(currentIndex);
+        });
+    </script>
+
+</body>
+</html>
